@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Pix Editor</title>
+
+    <meta name="theme-color" content="#111827" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" href="icons/icon-192.png" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+
+    <div class="desktop-blocker">
+        <h1>Pix Editor</h1>
+        <p>This app is made for mobile only.</p>
+        <p>Please open it on your phone.</p>
+    </div>
+
+    <main class="app">
+        <header class="topbar">
+            <div class="brand-box">
+                <div>
+                    <h1>Pix Editor</h1>
+                    <p>Mobile image editor</p>
+                </div>
+
+                <button type="button" id="installBtn" class="install-btn">
+                    ⬇ Install
+                </button>
+            </div>
+
+            <div class="top-actions">
+                <button type="button" id="undoBtn" class="small-btn" disabled>↶ Undo</button>
+                <button type="button" id="redoBtn" class="small-btn" disabled>↷ Redo</button>
+                <button type="button" id="resetBtn" class="small-btn">Reset</button>
+                <button type="button" id="exportTopBtn" class="small-btn export-btn">Export</button>
+            </div>
+        </header>
+
+        <section class="upload-card" id="uploadBox">
+            <input type="file" id="fileInput" accept="image/*" hidden />
+            <button type="button" class="upload-btn" onclick="document.getElementById('fileInput').click()">
+                Upload Image
+            </button>
+            <p>Your image stays on your phone.</p>
+        </section>
+
+        <section class="restore-box" id="restoreBox">
+            <p>Previous editing project found. Do you want to restore it?</p>
+
+            <div class="restore-actions">
+                <button type="button" class="restore-yes" id="restoreYesBtn">Restore</button>
+                <button type="button" class="restore-no" id="restoreNoBtn">Start New</button>
+            </div>
+        </section>
+
+        <section class="preview-card">
+            <div id="emptyState" class="empty-state">
+                <div class="empty-icon">🖼️</div>
+                <strong>No image selected</strong>
+                <span>Upload an image to start editing</span>
+            </div>
+
+            <div class="canvas-wrap" id="canvasWrap">
+                <canvas id="canvas"></canvas>
+
+                <div class="text-edit-wrap" id="textEditWrap">
+                    <div class="text-edit-box" id="textEditBox" contenteditable="true" spellcheck="false">Text</div>
+                    <span class="text-resize-handle" id="textResizeHandle"></span>
+                </div>
+
+                <div class="crop-overlay" id="cropOverlay">
+                    <div class="crop-box" id="cropBox">
+                        <span class="crop-handle tl" data-handle="tl"></span>
+                        <span class="crop-handle tr" data-handle="tr"></span>
+                        <span class="crop-handle bl" data-handle="bl"></span>
+                        <span class="crop-handle br" data-handle="br"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="crop-controls" id="cropControls">
+                <button type="button" id="applyCropBtn">Apply</button>
+                <button type="button" id="cancelCropBtn">Cancel</button>
+                <button type="button" id="resetCropBtn">Reset Crop</button>
+            </div>
+
+            <p id="imageInfo" class="image-info"></p>
+
+            <button type="button" id="changeImageBtn" class="change-btn">
+                Change Image
+            </button>
+        </section>
+
+        <section class="controls-scroll-area">
+            <nav class="tabs">
+                <button type="button" class="tab-btn active" data-tab="adjust">Adjust</button>
+                <button type="button" class="tab-btn" data-tab="edit">Edit</button>
+                <button type="button" class="tab-btn" data-tab="filters">Filters</button>
+                <button type="button" class="tab-btn" data-tab="convert">Convert</button>
+                <button type="button" class="tab-btn" data-tab="resize">Resize</button>
+            </nav>
+
+            <section class="panel active" id="adjust">
+                <h2>Adjust Image</h2>
+
+                <label>Brightness: <span id="brightnessValue">0</span></label>
+                <input type="range" id="brightnessRange" min="-100" max="100" value="0" />
+
+                <label>Contrast: <span id="contrastValue">0</span></label>
+                <input type="range" id="contrastRange" min="-100" max="100" value="0" />
+
+                <label>Saturation: <span id="saturationValue">0</span></label>
+                <input type="range" id="saturationRange" min="-100" max="100" value="0" />
+
+                <label>Warmth: <span id="warmthValue">0</span></label>
+                <input type="range" id="warmthRange" min="-100" max="100" value="0" />
+
+                <label>Shine: <span id="shineValue">0</span></label>
+                <input type="range" id="shineRange" min="-100" max="100" value="0" />
+
+                <label>Sharpness: <span id="sharpnessValue">0</span></label>
+                <input type="range" id="sharpnessRange" min="-100" max="100" value="0" />
+
+                <label>Blur: <span id="blurValue">0</span></label>
+                <input type="range" id="blurRange" min="0" max="20" value="0" />
+            </section>
+
+            <section class="panel" id="edit">
+                <h2>Edit Image</h2>
+
+                <div class="edit-main-grid">
+                    <button type="button" id="startCropBtn" class="main-btn">Crop Image</button>
+                    <button type="button" id="startTextBtn" class="main-btn">Text</button>
+                </div>
+
+                <div class="text-editor-toolbar" id="textEditorToolbar">
+                    <div class="toolbar-main">
+                        <button type="button" id="fontToolBtn" class="toolbar-btn">Aa</button>
+
+                        <button type="button" id="colorToolBtn" class="toolbar-btn color-tool">
+                            <span class="color-wheel"></span>
+                        </button>
+
+                        <button type="button" id="addTextLayerBtn" class="toolbar-btn">T</button>
+                        <button type="button" id="boldToolBtn" class="toolbar-btn">B</button>
+                        <button type="button" id="deleteTextBtn" class="toolbar-btn danger-icon">🗑</button>
+                        <button type="button" id="textDoneBtn" class="toolbar-done">Done</button>
+                    </div>
+
+                    <div class="font-panel" id="fontPanel">
+                        <button type="button" class="font-chip active" data-font="Arial"
+                            style="font-family: Arial;">Editor</button>
+                        <button type="button" class="font-chip" data-font="Georgia"
+                            style="font-family: Georgia;">Poster</button>
+                        <button type="button" class="font-chip" data-font="Comic Sans MS"
+                            style="font-family: 'Comic Sans MS';">Bubble</button>
+                        <button type="button" class="font-chip" data-font="Courier New"
+                            style="font-family: 'Courier New';">Mono</button>
+                        <button type="button" class="font-chip" data-font="Impact"
+                            style="font-family: Impact;">Impact</button>
+                        <button type="button" class="font-chip" data-font="Trebuchet MS"
+                            style="font-family: 'Trebuchet MS';">Clean</button>
+                        <button type="button" class="font-chip" data-font="Verdana"
+                            style="font-family: Verdana;">Soft</button>
+                        <button type="button" class="font-chip" data-font="Times New Roman"
+                            style="font-family: 'Times New Roman';">Classic</button>
+                        <button type="button" class="font-chip" data-font="Garamond"
+                            style="font-family: Garamond;">Royal</button>
+                        <button type="button" class="font-chip" data-font="Brush Script MT"
+                            style="font-family: 'Brush Script MT';">Brush</button>
+                        <button type="button" class="font-chip" data-font="Lucida Handwriting"
+                            style="font-family: 'Lucida Handwriting';">Hand</button>
+                        <button type="button" class="font-chip" data-font="Tahoma"
+                            style="font-family: Tahoma;">Modern</button>
+                        <button type="button" class="font-chip" data-font="Arial Black"
+                            style="font-family: 'Arial Black';">Heavy</button>
+                        <button type="button" class="font-chip" data-font="Copperplate"
+                            style="font-family: Copperplate;">Luxury</button>
+                        <button type="button" class="font-chip" data-font="Papyrus"
+                            style="font-family: Papyrus;">Ancient</button>
+                        <button type="button" class="font-chip" data-font="Palatino Linotype"
+                            style="font-family: 'Palatino Linotype';">Elegant</button>
+                        <button type="button" class="font-chip" data-font="Franklin Gothic Medium"
+                            style="font-family: 'Franklin Gothic Medium';">Gothic</button>
+                        <button type="button" class="font-chip" data-font="Century Gothic"
+                            style="font-family: 'Century Gothic';">Round</button>
+                        <button type="button" class="font-chip" data-font="fantasy"
+                            style="font-family: fantasy;">Fancy</button>
+                        <button type="button" class="font-chip" data-font="cursive"
+                            style="font-family: cursive;">Cursive</button>
+                        <button type="button" class="font-chip" data-font="serif"
+                            style="font-family: serif;">Serif</button>
+                        <button type="button" class="font-chip" data-font="monospace"
+                            style="font-family: monospace;">Code</button>
+                    </div>
+
+                    <div class="color-panel" id="colorPanel">
+                        <button type="button" class="color-dot active" data-color="#ffffff"
+                            style="background:#ffffff;"></button>
+                        <button type="button" class="color-dot" data-color="#000000"
+                            style="background:#000000;"></button>
+                        <button type="button" class="color-dot" data-color="#ef4444"
+                            style="background:#ef4444;"></button>
+                        <button type="button" class="color-dot" data-color="#f97316"
+                            style="background:#f97316;"></button>
+                        <button type="button" class="color-dot" data-color="#facc15"
+                            style="background:#facc15;"></button>
+                        <button type="button" class="color-dot" data-color="#84cc16"
+                            style="background:#84cc16;"></button>
+                        <button type="button" class="color-dot" data-color="#22c55e"
+                            style="background:#22c55e;"></button>
+                        <button type="button" class="color-dot" data-color="#14b8a6"
+                            style="background:#14b8a6;"></button>
+                        <button type="button" class="color-dot" data-color="#06b6d4"
+                            style="background:#06b6d4;"></button>
+                        <button type="button" class="color-dot" data-color="#3b82f6"
+                            style="background:#3b82f6;"></button>
+                        <button type="button" class="color-dot" data-color="#6366f1"
+                            style="background:#6366f1;"></button>
+                        <button type="button" class="color-dot" data-color="#a855f7"
+                            style="background:#a855f7;"></button>
+                        <button type="button" class="color-dot" data-color="#ec4899"
+                            style="background:#ec4899;"></button>
+                        <button type="button" class="color-dot" data-color="#f43f5e"
+                            style="background:#f43f5e;"></button>
+                        <button type="button" class="color-dot" data-color="#9ca3af"
+                            style="background:#9ca3af;"></button>
+                        <button type="button" class="color-dot" data-color="#78350f"
+                            style="background:#78350f;"></button>
+                    </div>
+
+                    <p class="hint-text">Type on image. Drag to move. Drag corner to resize.</p>
+                </div>
+
+                <h3 class="mini-title">Transform</h3>
+
+                <div class="transform-grid">
+                    <button type="button" id="rotateLeftBtn" class="tool-btn">↺ Rotate Left</button>
+                    <button type="button" id="rotateRightBtn" class="tool-btn">↻ Rotate Right</button>
+                    <button type="button" id="flipXBtn" class="tool-btn">⇄ Flip X</button>
+                    <button type="button" id="flipYBtn" class="tool-btn">⇅ Flip Y</button>
+                </div>
+            </section>
+
+            <section class="panel" id="filters">
+                <h2>Filters</h2>
+
+                <div class="filter-grid">
+                    <button type="button" class="filter-btn active" data-filter="none">Normal</button>
+                    <button type="button" class="filter-btn" data-filter="softPortrait">Soft Portrait</button>
+                    <button type="button" class="filter-btn" data-filter="creamyPortrait">Creamy Portrait</button>
+                    <button type="button" class="filter-btn" data-filter="cinematic">Cinematic</button>
+                    <button type="button" class="filter-btn" data-filter="moodyDark">Moody Dark</button>
+                    <button type="button" class="filter-btn" data-filter="dreamyRetro">Dreamy Retro</button>
+                    <button type="button" class="filter-btn" data-filter="vintageFilm">Vintage Film</button>
+                    <button type="button" class="filter-btn" data-filter="goldenHour">Golden Hour</button>
+                    <button type="button" class="filter-btn" data-filter="festivalWarm">Festival Warm</button>
+                    <button type="button" class="filter-btn" data-filter="coolBlue">Cool Blue</button>
+                    <button type="button" class="filter-btn" data-filter="nightBlue">Night Blue</button>
+                    <button type="button" class="filter-btn" data-filter="greenFilm">Green Film</button>
+                    <button type="button" class="filter-btn" data-filter="retroOrange">Retro Orange</button>
+                    <button type="button" class="filter-btn" data-filter="cleanBright">Clean Bright</button>
+                    <button type="button" class="filter-btn" data-filter="animePop">Anime Pop</button>
+                    <button type="button" class="filter-btn" data-filter="bw">B & W</button>
+                    <button type="button" class="filter-btn" data-filter="noir">Noir</button>
+                    <button type="button" class="filter-btn" data-filter="sepia">Sepia</button>
+                    <button type="button" class="filter-btn" data-filter="oldPhoto">Old Photo</button>
+                    <button type="button" class="filter-btn" data-filter="highContrast">High Contrast</button>
+                    <button type="button" class="filter-btn" data-filter="fadeMatte">Fade Matte</button>
+                    <button type="button" class="filter-btn" data-filter="softFade">Soft Fade</button>
+                    <button type="button" class="filter-btn" data-filter="cyberpunk">Cyberpunk</button>
+                </div>
+            </section>
+
+            <section class="panel" id="convert">
+                <h2>Convert Format</h2>
+
+                <label>Export as</label>
+
+                <input type="hidden" id="exportFormat" value="image/png" />
+
+                <div class="format-row">
+                    <button type="button" class="format-option active" data-format="image/png">PNG</button>
+                    <button type="button" class="format-option" data-format="image/jpeg">JPG</button>
+                    <button type="button" class="format-option" data-format="image/webp">WEBP</button>
+                </div>
+
+                <label>Quality: <span id="qualityValue">90%</span></label>
+                <input type="range" id="qualityRange" min="10" max="100" value="90" />
+
+                <label>File name</label>
+                <input type="text" id="fileName" value="edited-image" />
+            </section>
+
+            <section class="panel" id="resize">
+                <h2>Resize Image</h2>
+
+                <label>Width</label>
+                <input type="number" id="resizeWidth" placeholder="Width" />
+
+                <label>Height</label>
+                <input type="number" id="resizeHeight" placeholder="Height" />
+
+                <div class="check-row">
+                    <input type="checkbox" id="keepRatio" checked />
+                    <label for="keepRatio">Keep aspect ratio</label>
+                </div>
+
+                <button type="button" id="applyResizeBtn" class="main-btn">Apply Resize</button>
+            </section>
+        </section>
+    </main>
+
+    <div class="export-modal" id="exportModal">
+        <div class="export-card">
+            <h2>Export Image</h2>
+
+            <img id="exportPreviewImg" class="export-preview-img" alt="Export preview" />
+
+            <div class="export-info">
+                <p id="exportMetaText">Preparing image...</p>
+            </div>
+
+            <div class="export-actions">
+                <button type="button" id="exportCancelBtn" class="export-cancel-btn">Cancel</button>
+                <button type="button" id="exportConfirmBtn" class="export-confirm-btn">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="install-modal" id="installModal">
+        <div class="install-card">
+            <button type="button" class="modal-close-btn" id="installCloseBtn">×</button>
+
+            <img src="icons/pix-editor-logo.png" alt="Pix Editor Logo" class="install-logo" />
+
+            <h2>Pix Editor v1.0</h2>
+            <p class="install-subtitle">Offline Image Editor & Converter</p>
+
+            <div class="install-features">
+                <p>✨ Edit photos with filters, text, crop & resize</p>
+                <p>🔄 Convert JPG, PNG and WEBP</p>
+                <p>📱 Works like a mobile app</p>
+                <p>⚡ Offline ready after install</p>
+            </div>
+
+            <div class="install-actions">
+                <button type="button" id="installLaterBtn" class="popup-secondary-btn">Maybe Later</button>
+                <button type="button" id="installNowBtn" class="popup-primary-btn">Install App</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-popup" id="appPopup">
+        <div class="app-popup-card">
+            <button type="button" class="modal-close-btn" id="appPopupCloseBtn">×</button>
+
+            <div class="popup-icon" id="appPopupIcon">⚠️</div>
+            <h2 id="appPopupTitle">Notice</h2>
+            <p id="appPopupMessage">Something happened.</p>
+
+            <button type="button" id="appPopupActionBtn" class="popup-primary-btn">
+                OK
+            </button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <span id="toastMessage">Done</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
