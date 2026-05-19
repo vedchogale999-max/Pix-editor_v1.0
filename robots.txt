@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vedchogale999-max.github.io/Pix-editor_v1.0/sitemap.xml
